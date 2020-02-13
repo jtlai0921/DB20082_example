@@ -1,0 +1,673 @@
+'*********** 16-1 *************************
+
+<?xml version ='1.0' encoding='UTF-8'?>                   
+<employee>
+  <id>123</id>
+  <name>Henry Tsai</name>
+  <tel>27384234</tel>
+  <birthday>1963/02/01</birthday>
+</employee>
+
+<html>
+  <head>
+    <title>XML Example</title>
+    </head>
+    <body>
+     <h3>Employee Data</h3>
+     <xml src="abc.xml" id="xmldoc"></xml>
+     <table border="2" datasrc="#xmldoc">
+     <tr>
+       <td><div datafld="id"></div></td>
+       <td><div datafld="name"></div></td>
+       <td><div datafld="tel"></div></td>
+       <td><div datafld="Birthday"></div></td>
+     </tr>
+   </table>
+  </body>
+</html>
+
+'*********** 16-2 *************************
+
+<employee>
+  XYZ Company employee record
+  <empid>123</empid>
+  <name>Henry Tsai</name>
+  <tel>27384234</tel>
+</employee>
+
+'*********** 16-3 *************************
+
+<?xml version ='1.0' encoding='UTF-8'?>   
+<employee>
+  XYZ Company employee record
+  <empid>123</empid>
+  <name>Henry Tsai</name>  
+  <orders>
+    <oid>3845</oid>
+    <odate>2000/11/10</odate>
+    <customer>ABC Company</customer> 
+  </orders> 
+</employee>
+
+<ROOT>
+<employee>
+  XYZ Company employee record
+  <empid>123</empid>
+  <name>Henry Tsai</name>  
+  <orders>
+    <oid>3845</oid>
+    <odate>2000/11/10</odate>
+    <customer>ABC Company</customer> 
+  </orders> 
+</employee>
+
+<employee>
+  <empid>456</empid>
+  <name>Lisa Chen</name>  
+  <orders>
+    <oid>2565</oid>
+    <odate>2000/11/20</odate>
+    <customer>RST Company</customer>  
+  </orders>
+<orders>
+     <oid>3846</oid>
+    <odate>2000/11/13</odate>
+    <customer>DEF Company</customer>
+  </orders>
+</employee>
+</ROOT> 
+
+'*********** 16-4 *************************
+
+USE sales3c
+SELECT mem_id, name, county FROM member
+
+USE sales3c
+SELECT mem_id, name, county FROM member FOR XML AUTO
+
+USE sales3c
+SELECT mem_id, name, county FROM member FOR XML AUTO
+
+
+USE 　　sales3c
+SELECT mem_id, name, county FROM member FOR XML RAW('memrec')
+
+USE     sales3c
+SELECT  mem_id, name, county 
+FROM    member FOR XML RAW('memrec'), ROOT('member')
+
+use      sales3c
+SELECT  SalesMast.inv_no, sdate, mcode, qty, upri
+FROM    sales_mast as SalesMast, sales_item as SalesDtl 
+WHERE   SalesMast.inv_no=SalesDtl.inv_no FOR XML AUTO
+
+
+
+'*********** 16-7 *************************
+
+
+http://129.199.12.100/sales3c?sql=select mem_id, name, county from member for xml auto &root=MEMREC
+
+
+http://129.199.12.100/sales3c?sql=
+SELECT sales_mast.mem_id, sales_mast.inv_no, sales_item.mcode, sales_item.qty, sales_item.upri FROM sales_mast, sales_item WHERE sales_mast.inv_no=sales_item.inv_no order by mem_id FOR XML AUTO&root=BUYREC
+
+
+'*********** 16-9 *************************
+
+<?xml version ='1.0' encoding='UTF-8'?>                   
+<buyrec xmlns:sql='urn:schemas-microsoft-com:xml-sql'>
+ <sql:query >
+SELECT   sales_mast.mem_id, sales_mast.inv_no, 
+sales_item.mcode, sales_item.qty, sales_item.upri 
+FROM    sales_mast, sales_item 
+WHERE   sales_mast.inv_no=sales_item.inv_no 
+order   by mem_id FOR XML AUTO
+</sql:query>
+</buyrec>
+
+
+<ROOT xmlns:sql="urn:schemas-microsoft-com:xml-sql"
+       sql:xsl='XSL FileName' >
+  <sql:header>
+    <sql:param>..</sql:param>
+    <sql:param>..</sql:param>....n
+  <sql:header>
+  <sql:query>
+    sql statement(s)
+  </sql:query>
+  <sql:XPath-query mapping-schema="SchemaFileName.xml">
+    XPath query
+  </sql:XPath-query>
+</ROOT>
+
+'*********** 16-10 *************************
+
+<?xml version ='1.0' encoding='Big5'?>                      
+<root xmlns:sql='urn:schemas-microsoft-com:xml-sql' sql:xsl='member.xsl'>  
+   <sql:query>                                                
+     SELECT  mem_id, name, county 
+     FROM    member FOR XML AUTO  
+   </sql:query>                                               
+</root>
+
+
+<?xml version ='1.0' encoding='Big5'?>
+<xsl:stylesheet xmlns:xsl=
+http://www.w3.org/1999/XSL/Transform version="1.0">
+    <xsl:template match = '*'>                                
+    <xsl:apply-templates />                               
+    </xsl:template>                                           
+    <xsl:template match = 'member'>                        
+       <TR>   
+         <TD><xsl:value-of select = '@mem_id' /></TD>      
+         <TD><B><xsl:value-of select = '@name' /></B></TD>
+         <TD><B><xsl:value-of select = '@county' /></B></TD>
+       </TR>                                                  
+    </xsl:template>
+    <xsl:template match = '/'>                               
+      <HTML>                                                  
+        <HEAD>                                                
+           <STYLE>th { background-color: #CCCCCC }</STYLE>    
+        </HEAD>                                               
+        <BODY>                                                
+         <TABLE border='5' style='width:600;'>                
+           <TR><TH colspan='3'>會員資料</TH></TR>            
+           <TR><TH>會員編號</TH>
+               <TH>姓 名</TH>
+               <TH>居住縣市</TH>
+           </TR>    
+           <xsl:apply-templates select = 'root' />        
+     </TABLE>                                             
+        </BODY>                                               
+      </HTML>                                                 
+    </xsl:template>                                           
+</xsl:stylesheet>   
+
+http://129.199.12.100/sales3c/template/member.xml?contenttype=text/html
+
+http://129.199.12.100/sales3c/template/member.xml?contenttype=text/html
+
+http://129.199.12.100/sales3c/template/member.xml?xsl=member.xsl
+
+
+'*********** 16-11 *************************
+
+USE sales3c
+GO
+CREATE PROCEDURE spMember AS
+SELECT  mem_id, name, county
+FROM    member
+FOR     XML AUTO
+GO
+
+
+<ROOT xmlns:sql="urn:schemas-microsoft-com:xml-sql">
+<sql:query>
+   exec spMember
+</sql:query>
+</ROOT>
+
+http://129.199.12.100/sales3c/template/xmlsp.xml
+
+USE sales3c
+GO
+CREATE PROCEDURE spMember1 @mem_id  char(8) AS
+SELECT  mem_id, name, county
+FROM    member
+where   mem_id=@mem_id
+FOR     XML AUTO
+
+<ROOT xmlns:sql='urn:schemas-microsoft-com:xml-sql'>
+  <sql:header>
+        <sql:param name='mem_id'></sql:param>  
+  </sql:header>                                          
+  <sql:query >                                              
+        exec spMember1 @mem_id
+  </sql:query>
+</ROOT>
+
+
+http://129.199.12.100/sales3c/template/xmlsp1.xml?mem_id=12345678
+
+'*********** 16-12 *************************
+
+<?xml version="1.0" ?>
+<?xml version="1.0" ?>
+<!-- xdrmem.xml -->
+<Schema xmlns="urn:schemas-microsoft-com:xml-data"
+        xmlns:dt="urn:schemas-microsoft-com:datatypes"
+        xmlns:sql="urn:schemas-microsoft-com:xml-sql">
+
+<ElementType name="memRec" sql:relation="member" >
+    <AttributeType name="mem_id" />
+    <AttributeType name="name" />
+    <AttributeType name="county" />
+
+    <attribute type="mem_id" sql:field="mem_id" />
+    <attribute type="name" sql:field="name" />
+    <attribute type="county" sql:field="county" />
+</ElementType>
+</Schema>
+
+<ROOT xmlns:sql="urn:schemas-microsoft-com:xml-sql">
+  <sql:xpath-query mapping-schema="xdrmem.xml">
+    memRec
+  </sql:xpath-query>
+</ROOT>
+
+http://129.199.12.100/sales3c/template/xmem.xml
+
+'*********** 16-13 *************************
+
+<!-- xmem2.xml -->
+<ROOT xmlns:sql="urn:schemas-microsoft-com:xml-sql">
+  <sql:xpath-query mapping-schema="xdrmem.xml">
+    memRec[@mem_id="12345678" or @mem_id="13454232”]
+  </sql:xpath-query>
+</ROOT>
+
+
+http://129.199.12.100/sales3c/template/xmem2.xml
+
+'*********** 16-14 *************************
+
+<?xml version="1.0" ?>
+<!-- xdrsales.xml -->
+<Schema xmlns="urn:schemas-microsoft-com:xml-data"
+        xmlns:dt="urn:schemas-microsoft-com:datatypes"
+        xmlns:sql="urn:schemas-microsoft-com:xml-sql">
+
+<ElementType name="Sales_item” sql:relation="sales_item" >
+    <AttributeType name="inv_no" />
+    <AttributeType name="mcode" />
+    <AttributeType name="upri" />
+    <AttributeType name="qty" />
+
+    <attribute type="inv_no" />
+    <attribute type="mcode" />
+    <attribute type="upri" />
+    <attribute type="qty" />
+</ElementType>
+
+<ElementType name="sales_m" sql:relation="sales_mast" >
+    <AttributeType name="mem_id" />
+    <AttributeType name="inv_no" />
+    <AttributeType name="sdate" />
+
+    <attribute type="mem_id" />
+    <attribute type="inv_no" />
+    <attribute type="sdate" />
+
+    <element type="Sales_item" >
+             <sql:relationship 
+                   key-relation="sales_mast"
+                   key="inv_no"
+                   foreign-key="inv_no"
+                   foreign-relation="sales_item" />
+    </element>
+</ElementType>
+</Schema>
+
+             <sql:relationship 
+                   key-relation="sales_mast"
+                   key="inv_no"
+                   foreign-key="inv_no"
+                   foreign-relation="sales_item" />
+    </element>
+
+
+
+<!-- xsales.xml -->
+<ROOT xmlns:sql="urn:schemas-microsoft-com:xml-sql"> 
+  <sql:xpath-query mapping-schema="xdrsales.xml">
+    sales_mast[@inv_no="LD18203283"]
+  </sql:xpath-query>
+</ROOT>
+
+
+http://129.199.12.100/sales3c/template/xsales.xml
+
+'*********** 16-15 *************************
+USE sales3c
+CREATE PROCEDURE GetMemBuy @mem_id char(8) AS
+SELECT  mem_id, a.inv_no, b.mcode, b.qty, b.upri
+FROM    sales_mast a, sales_item b 
+WHERE   a.inv_no=b.inv_no 
+AND     a.mem_id=@mem_id FOR XML AUTO
+
+
+CREATE ENDPOINT sales3c_edp 
+STATE = STARTED
+AS HTTP(
+   PATH = '/sales3c', 
+   AUTHENTICATION = (INTEGRATED ), 
+   PORTS = ( CLEAR ), 
+   SITE = 'localhost'
+   )
+FOR SOAP (
+   WEBMETHOD 'GetMemBuy'
+            (NAME='sales3c.dbo.GetMemBuy', 
+             SCHEMA=STANDARD ),
+   BATCHES  = ENABLED,
+   WSDL = DEFAULT,
+   SCHEMA = STANDARD,
+   DATABASE = 'sales3c'
+   ); 
+
+'*********** 16-17 *************************
+
+<?xml version ='1.0' encoding='Big5'?>  
+<ROOT>
+<member mem_id="1001" name="會員一" county="台北縣" town="中和市" /> 
+<member mem_id="1002" name="會員二" county="台中市" town="北屯區" /> 
+<member mem_id="1003" name="會員三" county="台北市" town="士林區" /> 
+<member mem_id="1004" name="會員四" county="台北市" town="中山區" /> 
+<member mem_id="1005" name="會員五" county="高雄縣" town="三民區" /> 
+</ROOT>
+
+EXEC sp_xml_preparedocument @idoc OUTPUT, @doc       
+
+OPENXML (@idoc,'/ROOT/member',1)
+          WITH (mem_id  char(4),                    
+                 name     varchar(20),
+                 county   varchar(10),
+                 town     varchar(10)
+)
+
+
+INSERT INTO member_tmp 
+OPENXML (@idoc,'/ROOT/member',1)
+          WITH (mem_id  char(4),                    
+                 name     varchar(20),
+                 county   varchar(10),
+                 town     varchar(10)
+)
+
+
+declare @idoc int
+declare @doc  varchar(1000)
+set @doc='
+<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member mem_id="1001" name="會員一" county="台北縣" town="中和市" /> 
+<member mem_id="1002" name="會員二" county="台中市" town="北屯區" /> 
+<member mem_id="1003" name="會員三" county="台北市" town="士林區" /> 
+<member mem_id="1004" name="會員四" county="台北市" town="中山區" /> 
+<member mem_id="1005" name="會員五" county="高雄縣" town="三民區" /> 
+</ROOT>'
+EXEC sp_xml_preparedocument @idoc OUTPUT, @doc
+SELECT * FROM
+OPENXML (@idoc,'/ROOT/member',1)
+          WITH (mem_id  char(4),                    
+                 name     varchar(20),
+                 county   varchar(10),
+                 town     varchar(10)
+)
+EXEC sp_xml_removedocument @idoc
+
+'*********** 16-18 *************************
+
+OPENXML (@idoc，'/ROOT/member'，1)
+           WITH (  mid     char(4)      '@mem_id',                  
+			         cname   varchar(20) '@name',
+			         county  varchar(10),
+			         town    varchar(10)
+)
+
+
+OPENXML (@idoc，'/ROOT/Customer/OrderDetail'，1)
+          WITH ( CustomerID  varchar(10)  '../CustomerID',                
+                   OrderDate    datetime     '../OrderDate',
+                   ProdID       char(6),
+                   Qty           int
+)
+
+
+DECLARE @idoc int
+DECLARE @doc varchar(1000)
+SET @doc ='
+<?xml version ="1.0" encoding="Big5"?>   
+<ROOT>
+<member mem_id="1001" name="會員一" county="台北縣"> 中和市 </member> 
+<member mem_id="1002" name="會員二" county="台中市"> 北屯區 </member> 
+</ROOT>'
+
+EXEC sp_xml_preparedocument @idoc OUTPUT,@doc
+SELECT * FROM 
+OPENXML (@idoc,'/ROOT/member',1)
+WITH ( mem_id  char(4),
+                  name    varchar(20),
+                  county  varchar(10), 
+                  town    varchar(10) 'text()'
+)
+EXEC sp_xml_removedocument @idoc
+
+
+OPENXML (@idoc,'/ROOT/member'，1)
+          WITH ( id       int              '@mp:id',
+                  lname    varchar(30)    '@mp:localname',
+                  mem_id   char(4),                   
+                  name      varchar(20),
+                  county    varchar(10),
+                  town      varchar(30)
+)
+
+
+SELECT * FROM OPENXML (@idoc,'/ROOT')  WITH (xml  ntext  '@mp:xmltext') 
+
+
+declare @idoc int
+declare @doc  varchar(1000)
+set @doc='
+<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member mem_id="1001" name="會員一" county="台北縣" town="中和市" /> 
+<member mem_id="1002" name="會員二" county="台中市" town="北屯區" /> 
+<member mem_id="1003" name="會員三" county="台北市" town="士林區" /> 
+</ROOT>'
+
+EXEC sp_xml_preparedocument @idoc OUTPUT, @doc
+
+SELECT * FROM
+OPENXML (@idoc,'/ROOT/member',9)
+         WITH ( mem_id  char(4),                         
+                 name     varchar(10),
+                 county  varchar(10),
+                 xml      ntext  '@mp:xmltext'
+)
+EXEC sp_xml_removedocument @idoc
+
+
+<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member mem_id="1001" name="會員一"  county="台北市" /> 
+<member mem_id="1002" name=’會員二"  county="台北縣" />
+</ROOT>
+
+
+DECLARE @idoc int
+DECLARE @doc varchar(1000)
+SET @doc =' 
+<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member mem_id="1001" name="會員一"  county="台北市" /> 
+<member mem_id="1001" name="會員二"  county="台北縣" /> 
+</ROOT>'
+
+EXEC sp_xml_preparedocument @idoc OUTPUT, @doc
+SELECT * FROM OPENXML (@idoc, '/ROOT/member', 1)         
+EXEC sp_xml_removedocument @idoc
+
+
+SELECT *  FROM OPENXML (@idoc, '/ROOT/member',1) WITH tbemp
+
+
+'*********** 16-19 *************************
+
+
+CREATE TABLE t1 (f1 varchar(10), f2 XML)
+
+
+insert into t1 values 
+(
+'1234','<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member mem_id="1001" name="會員一" county="台北縣" town="中和市" /> 
+<member mem_id="1002" name="會員二" county="台中市" town="北屯區" /> 
+<member mem_id="1003" name="會員三" county="台北市" town="士林區" /> 
+</ROOT>'
+)
+
+
+
+'*********** 16-20 *************************
+
+declare @xdoc xml
+set @xdoc=
+'<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member>
+  <mem_id>1001</mem_id>
+  <name>會員一</name>
+  <addr>台北縣中和市...</addr>
+</member> 
+<member>
+  <mem_id>1002</mem_id>
+  <name>會員二</name>
+  <addr>台北市中山區...</addr>
+</member> 
+</ROOT>'
+SELECT @xdoc.query('/ROOT/member/addr')
+
+
+
+declare @xdoc xml
+set @xdoc=
+'<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member mem_id="1001">
+  <name>會員一</name>
+  <addr>台北縣中和市...</addr>
+</member> 
+<member mem_id="1002">
+  <name>會員二</name>
+  <addr>台北市中山區...</addr>
+</member> 
+</ROOT>'
+
+SELECT @xdoc.value('(/ROOT/member/@mem_id)[1]','char(4)')
+
+
+declare @xdoc xml
+set @xdoc=
+'<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member mem_id="1001">
+  <name>會員一</name>
+</member> 
+<member mem_id="1002">
+  <name>會員二</name>
+</member> 
+</ROOT>'
+
+SELECT @xdoc.exist('/ROOT/member[@mem_id=1001]')
+
+
+use sales3c
+declare @xdoc xml
+set @xdoc=
+'<?xml version ="1.0" encoding="Big5"?>
+<ROOT>
+<member mem_id="1001">
+  <name>會員一</name>
+</member> 
+<member mem_id="1001">
+  <name>會員二</name>
+</member> 
+</ROOT>'
+
+SET @xdoc.modify('insert <addr>台北市內湖區</addr> 
+into (/ROOT/member)[2]') 
+select @xdoc 
+
+
+declare @xdoc xml
+set @xdoc=
+'<?xml version ="1.0" encoding="Big5"?>  
+<ROOT>
+<member>
+  <mem_id>1001</mem_id>
+  <name>會員一</name>
+  <addr>台北縣中和市...</addr>
+</member> 
+
+<member>
+  <mem_id>1002</mem_id>
+  <name>會員二</name>
+  <addr>台北市中山區...</addr>
+</member> 
+</ROOT>'
+
+SELECT  T.c.query('mem_id') as mem_id, T.c.query('name') as name,
+         T.c.query('addr') as addr
+FROM    @xdoc.nodes('/ROOT/member') T(c) 
+
+
+'*********** 16-21 *************************
+
+
+USE sales3c
+go
+CREATE XML SCHEMA COLLECTION MemberCollecation AS 
+'<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  xmlns="http://myMember" 
+  elementFormDefault="qualified"
+  targetNamespace="http://myMember">
+
+  <xsd:element name="MemberInfo" type="MemberType" />
+    <xsd:complexType name="MemberType">
+      <xsd:sequence maxOccurs="unbounded">
+         <xsd:element name="member" type="MemberRec" />
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="MemberRec">
+       <xsd:sequence>
+         <xsd:element name="name" type="xsd:string" />
+         <xsd:element name="location" type="address" />
+         <xsd:element name="birth" type="xsd:date" />
+       </xsd:sequence>
+       <xsd:attribute name="mem_id" type="xsd:string" />
+       <xsd:attribute name="gender" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="address">
+       <xsd:sequence>
+         <xsd:element name="county" type="xsd:string" />
+         <xsd:element name="village" type="xsd:string" />
+       </xsd:sequence>
+    </xsd:complexType>
+ </xsd:schema>'
+
+
+select * from sys.xml_schema_collections
+
+create table Txml (f1 xml(MemberCollecation))
+
+use sales3c
+INSERT Txml VALUES ('<?xml version="1.0"?>
+<MemberInfo xmlns="http://myMember">
+  <member mem_id="12345678" gender="男">
+    <name>王大德</name>
+    <location>
+      <county>台北縣</county>
+      <village>永和市</village>
+    </location>
+    <birth>1978-12-01Z</birth>
+  </member>
+</MemberInfo>')
+
+
+
+

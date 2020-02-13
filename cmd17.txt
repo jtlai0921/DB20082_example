@@ -1,0 +1,18 @@
+'*************** 17-4 ****************
+
+select   a.sdate, b.inv_no, b.lno, b.mcode, d.name, b.upri, b.qty, 
+c.stor_name, a.mem_id, a.stor_id
+from     sales_mast a, sales_item b, store c, product d
+where    a.inv_no=b.inv_no and a.stor_id=c.stor_id
+and b.mcode=d.mcode
+order    by a.sdate, b.inv_no, b.lno, a.mem_id
+
+'*************** 17-8 ****************
+
+="SELECT  aDATE¡Ab.INV_NO, b.LNO, b.MCODE, d.NAME, b.UPRI, b.QTY, c.STOR_NAME, a.MEM_ID, a.STOR_ID"  &
+" FROM sales_mast AS a INNER JOIN"  &
+" sales_item AS b ON a.INV_NO = b.INV_NO INNER JOIN"  &
+" STORE AS c ON a.STOR_ID = c.STOR_ID INNER JOIN"  &
+" product AS d ON b.MCODE = d.MCODE"  &
+" where a.stor_id='" & Parameters!ªù¥«.Value  & "'"  & 
+" ORDER BY  a.SDATE, b.INV_NO, b.LNO, a.MEM_ID"

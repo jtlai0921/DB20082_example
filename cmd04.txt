@@ -1,0 +1,136 @@
+
+'************ 4-2 **********
+
+   SELECT  	emp_no, name, date_hired
+   FROM   	employee
+   WHERE  	date_hired >= '2001/01/01'
+   AND    	date_hired <= '2005/12/31'
+   ORDER  	BY  date_hired, emp_no
+
+'************ 4-7 **********
+
+SELECT   mcode, qty, upri, qty * upri
+FROM	 sales_item
+
+SELECT	mcode, qty, upri,(qty * upri) amt　
+FROM	sales_item
+
+
+SELECT	mcode, qty, upri,(qty * upri) as amt　
+FROM	sales_item
+
+
+SELECT  SUM(salary), AVG(salary)  FROM  employee
+
+SELECT 	name, SUBSTRING(addr, 1, 3) 	        
+FROM   	employee
+
+
+SELECT 	name, CONVERT(char(8), birthday, 11) 
+FROM   	employee
+
+
+SELECT 	COUNT(*)
+FROM	sales_item
+WHERE	qty*upri > 5000
+
+'************ 4-8 **********
+
+   SELECT  mcode, qty, upri	        
+   FROM    sales_item
+   ORDER   BY mcode, qty
+
+   SELECT	 mcode, qty, (upri*qty) amt
+   FROM  	 sales_item
+   ORDER	 BY  amt DESC 
+
+
+   SELECT	 mcode, qty, (upri*qty) amt
+   FROM  	 sales_item
+   ORDER	 BY  3 DESC
+
+'************ 4-9 **********
+
+SELECT   TOP 3 inv_no, amt=sum(upri*qty)
+FROM     sales_item 
+group    by inv_no 
+order    by amt DESC
+
+
+SELECT  TOP 3 WITH TIES inv_no, amt=sum(upri*qty)
+FROM     sales_item 
+GROUP    BY inv_no 
+ORDER    BY amt DESC
+
+ 
+
+SELECT  mcode, SUM(qty*upri) amt
+FROM    sales_item
+GROUP   BY mcode
+ORDER   BY amt DESC
+
+
+SELECT   DATEPART(MM,birthday) birth_month, gender, count(*)as 人數
+FROM     employee
+GROUP    BY DATEPART(MM,birthday), gender
+ORDER    BY birth_month, gender
+
+
+SELECT 	 inv_no, COUNT(*)資料筆數
+FROM 	 sales_item
+GROUP 	 BY 	inv_no 
+HAVING	 COUNT(*) > 1
+ORDER	 BY 	inv_no
+
+
+SELECT DATEPART(MM,sdate)as 月份, stor_id as 門市, count(*) as 銷售筆數
+FROM sales_mast
+GROUP BY DATEPART(MM,sdate), stor_id with cube
+
+
+SELECT	*  FROM	sales_item
+WHERE	qty >= 3
+
+
+SELECT   dept as 部門, name as 姓名, title as 職稱, addr 地址
+FROM	 employee
+WHERE    SUBSTRING(addr,1,3) in ('台北市','高雄市')
+AND	 gender = 'F'
+
+
+SELECT   stor_id 門市, DATEPART(MONTH, sdate) 月份, count(*) 銷售筆數 
+FROM     sales_mast
+WHERE    DATEPART(YEAR, sdate) = 2006
+GROUP    BY stor_id, DATEPART(MONTH, sdate)
+ORDER    BY stor_id, DATEPART(MONTH, sdate)
+
+
+SELECT  name, title, gender
+FROM    employee
+WHERE	title = '經理' OR title = '專員' AND gender = 'F'
+
+
+SELECT  name, title, gender
+FROM   	employee
+WHERE	(title = '經理' OR title = '專員') AND gender = 'F'
+
+
+'************ 4-10 **********
+
+SELECT	 * FROM employee WHERE	 name LIKE ‘王%功’
+
+
+'************ 4-11 **********
+
+SELECT  * FROM sales_mast, sales_item
+
+SELECT  * FROM sales_mast CROSS JOIN sales_item
+
+SELECT *  FROM sales_mast JOIN sales_item
+ON	  sales_mast.inv_no = sales_item.inv_no 
+order     by sales_mast.inv_no
+
+
+
+
+

@@ -1,0 +1,136 @@
+'*************** 9-5 **************
+
+CREATE PROCEDURE  uspInv_Amt @inv_no char(10),@p_tot  int output  AS
+SELECT  	@p_tot = sum(upri*qty)
+FROM   	sales_item
+WHERE  	inv_no=@inv_no
+RETURN     @p_tot
+
+'*************** 9-6 **************
+
+ DECLARE @tot_amt INT 
+ EXECUTE uspInv_Amt ‘LD18203284’,  @tot_amt OUTPUT
+ SELECT  @tot_amt
+
+ 
+ DECLARE	  @ret_val int
+ DECLARE     @tot_amt int 
+ EXECUTE     @ret_val= uspInv_Amt ‘LD18203284’, @tot_amt output
+ SELECT      @tot_amt,  @ret_val
+
+ DECLARE 	@proc_name varchar(30)
+  SELECT 	@proc_name = 'sp_helpdb'
+  EXEC  	@proc_name 
+
+  DECLARE	@v_mem_id   char(8)
+  DECLARE	@v_statement  char(80)  
+  SELECT	@v_mem_id=’12345678’
+  SELECT	@v_statement=  
+  'SELECT * FROM member WHERE mem_id='+@v_mem_id
+  EXECUTE (@v_statement)
+
+
+  DECLARE	@v_place       char(3)
+  DECLARE	@v_statement  char(80)  
+  
+  SELECT	@v_place='kao'
+  SELECT	@v_statement='SELECT * FROM sales_'+@v_place
+  EXECUTE (@v_statement)
+
+'*************** 9-13 **************
+CREATE TRIGGER tri_member
+  	ON member
+  	FOR DELETE  AS 
+    IF CURRENT_USER <> 'dbo' 
+     BEGIN 
+      RAISERROR('You have no right to delete ...', 16, 10)
+      ROLLBACK TRANSACTION 
+    END 
+
+
+CREATE TRIGGER tri_employee
+  	ON employee
+  	FOR UPDATE AS 
+IF UPDATE (salary) 
+ BEGIN 
+   ROLLBACK TRANSACTION  --將對salary的更改還原
+   INSERT INTO modify_log
+     VALUES (CURRENT_USER,GETDATE())
+ END
+
+'*************** 9-15 **************
+
+CREATE TRIGGER tri_emp
+  	ON employee
+  	FOR DELETE  AS 
+   	PRINT '以下是employee資料表內容:'
+  	     SELECT * FROM employee
+    	PRINT '----------------------------------------'
+   	PRINT '以下是DELETED資料表內容:'
+    	SELECT * FROM DELETED
+     	ROLLBACK TRANSACTION
+
+CREATE TRIGGER tr_emp
+  	ON employee FOR DELETE  AS 
+   DECLARE  @row_cnt  INT
+   SELECT @row_cnt = count(*) FROM DELETED
+  	IF @row_cnt > 1 
+    BEGIN
+	    PRINT '此一刪除動作可能會刪除多筆人事資料表資料 !!!'
+	    ROLLBACK TRANSACTION
+    END
+
+
+CREATE TRIGGER tri_sales ON sales FOR INSERT AS 
+    DELETE sales FROM sales, INSERTED
+    WHERE sales.order_no = INSERTED.order_no
+    AND INSERTED.sale_id NOT IN 
+        (SELECT emp_no FROM employee)
+
+
+CREATE TRIGGER tr_employee
+  ON employee FOR UPDATE AS 
+
+   SELECT * FROM DELETED
+   SELECT * FROM INSERTED
+
+
+UPDATE 	employee 
+  SET    	emp_name = '王大華' 
+  WHERE 	emp_name = '陳自強'
+
+'*************** 9-16 **************
+
+USE sales3c
+SELECT * FROM sysobjects  WHERE type = 'TR'
+
+
+'*************** 9-17 **************
+
+CREATE TRIGGER tri_nodrop 
+ON DATABASE 
+FOR DROP_TABLE 
+AS 
+   PRINT '你不可以drop任何資料表 !’
+   ROLLBACK ;
+
+
+CREATE TRIGGER tri_nodrop_log
+ON DATABASE 
+FOR DROP_TABLE 
+AS 
+DECLARE @ev XML
+SET @ev = EVENTDATA()
+rollback;  '讓drop table的動作失效
+INSERT into ddl_tri_log (tri_when, tri_who, tri_what, tri_obj) 
+   VALUES 
+   (
+   GETDATE(), 
+   CURRENT_USER, 
+   @ev.value('(/EVENT_INSTANCE/TSQLCommand)[1]', 'nvarchar(200)'),
+   @ev.value('(/EVENT_INSTANCE/ObjectName)[1]', 'nvarchar(200)')
+   ) ;
+   PRINT '你不可以drop任何資料表!'
+ Go
+
+

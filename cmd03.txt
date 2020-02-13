@@ -1,0 +1,202 @@
+'************ 3-1  **********
+
+USE sales3c
+CREATE TABLE member 
+(
+   mem_id   	INT	IDENTITY PRIMARY KEY,  	/* 會員編號*/
+   name    	VARCHAR(20) NOT NULL,  		/* 會員姓名 */
+   gender   	CHAR(1) NOT NULL,	   	/* 性別 */
+   birth	DATETIME, 			* 生日 */
+   county      	VARCHAR(10), 			/* 地址-縣市 */
+   town      	VARCHAR(10),			* 地址-區鄉鎮 */
+   addr		VARCHAR(80),  			/* 地址-路門牌 */
+   zip  	CHAR(3), 			/* 郵遞區號 */
+   tel_area 	VARCHAR(3), 			/* 電話區碼 */
+   tel_no  	VARCHAR(8),			/* 電話號碼 */
+   pid		CHAR(10) UNIQUE			/* 身份証號碼 */
+)
+
+
+USE sales3c
+CREATE TABLE sales_mast
+(
+   inv_no  		CHAR(10)   PRIMARY KEY,     		/*發票號碼 */
+   stor_id	    	CHAR(4) NOT NULL,    			/* 門市代碼 */
+   mem_id	 	CHAR(8) NOT NULL,          		/* 會員編號 */
+   buy_date     	DATETIME   DEFAULT  GETDATE() NOT NULL, /* 購買日期 */
+   pri  	     	NUMERIC(6,0)  DEFAULT 0,     		/* 單價 */
+   qty 			INT   DEFAULT 0, 	           	/* 數量 */
+   FOREIGN     		KEY (stor_id) REFERENCES store(stor_id)
+)
+
+'************ 3-3  **********
+
+ CREATE TABLE MyTable (
+   fld_1  UNIQUEIDENTIFIER DEFAULT NEWID(),        
+   fld_2  VARCHAR(10), 
+   fld_3  INT
+  )
+
+
+INSERT INTO MyTable(fld_2, fld_3) VALUES ('abc', 1234)
+INSERT INTO MyTable VALUES (NEWID(), 'abc', 1234)
+
+'************ 3-4  **********
+
+CREATE TYPE  empid FROM  varchar(5)  NOT NULL
+
+'************ 3-5  **********
+
+/* 銷售明細資料表 */
+CREATE TABLE  sales_item (
+ inv_no    char (10)    NOT NULL,
+ item_no   char(3)      NOT NULL,
+ mcode     char (10)    NOT NULL,
+ qty       int  	NOT NULL DEFAULT 0,
+ upri      int  	NOT NULL DEFAULE 0, 
+ CONSTRAINT  PK_SALES_ITEM  PRIMARY KEY CLUSTERED (inv_no, item_no)
+)
+ 
+
+USE sales3c
+CREATE TABLE sales_mast
+(
+   inv_no  		CHAR(10)   PRIMARY KEY,     	/*發票號碼 */
+   stor_id	    	CHAR(4) NOT NULL,    		/* 門市代碼 */
+   mem_id	 	CHAR(8) NOT NULL,          	/* 會員編號 */
+   buy_date      	DATETIME   DEFAULT GETDATE() NOT NULL,/* 購買日期 */
+   FOREIGN     		KEY (stor_id) REFERENCES store(stor_id)
+)
+
+/* 門市資料表 */
+USE sales3c
+CREATE TABLE  store (
+  stor_id  char(4)   		NOT NULL,
+  stor_name  varchar(20)   	NOT NULL,
+  county  varchar(10)   	NOT NULL,
+  town  varchar(10)   		NOT NULL,
+  addr  varchar(50)   		NULL,
+  CONSTRAINT  PK_STORE PRIMARY KEY (stor_id)
+)
+
+
+/* 商品價格檔 */
+USE sales3c
+CREATE TABLE price
+(
+   mcode	 CHAR(10),  	/* 商品編號 */ 
+   name       VARCHAR(100),	/* 商品名稱 */
+   upri	     INT CHECK		/* 單價 */
+		 	(upri BETWEEN 5000 AND 10000)
+   PRIMARY KEY (mcode)
+)
+
+
+/* 商品價格資料表 */
+USE sales3c
+CREATE TABLE price
+(
+   mcode  	CHAR(10),			/* 商品貨號*/ 
+   upri 	INT,                  		/* 單價    */
+   modi_by   	CHAR(5) DEFAULT USER,  	 	/* 改價者  */
+   modi_date  	DATETIME  DEFAULT GETDATE() 	/* 改價日  */  
+)
+
+'************ 3-8  **********
+
+ALTER TABLE employee ADD CONSTRAINT ck_zip 
+         CHECK (zip LIKE '[0-9] [0-9] [0-9]')
+
+
+ALTER TABLE product ADD CONSTRAINT pk_prod
+            PRIMARY KEY CLUSTERED (prod_id,sup_id)
+
+
+ALTER TABLE employee WITH NOCHECK 
+        ADD CONSTRAINT ck_zip CHECK (zip LIKE '[0-9] [0-9] [0-9]')
+
+
+'************ 3-10  **********
+
+GRANT SELECT, UPDATE(unit_price) ON product TO  john, mary 
+
+REVOKE SELECT UPDATE(unit_price) ON product FROM john, mary 
+
+
+'************ 3-11  **********
+
+insert into sales_mast
+ values ('LV12347363','1008','2006/12/3','10929987',0)
+
+'************ 3-12  **********
+
+use sales3c
+EXEC sp_fulltext_database 'enable'
+
+select  title_id, title from books 
+		where contains(title, ' "Cooking" OR "Compute*" ')
+
+
+'************ 3-12  **********
+
+CREATE PARTITION FUNCTION pfMember(varchar(2))
+AS RANGE LEFT FOR VALUES ('E', 'J', 'O', 'T')
+
+CREATE PARTITION SCHEME psMember
+AS PARTITION pfMember TO (fg1, fg1, fg2, fg2, fg2)
+
+CREATE PARTITION SCHEME psMember AS PARTITION pfMember ALL TO (fg1)
+
+CREATE PARTITION SCHEME psMember
+AS PARTITION pfMember TO ([PRIMARY], fg1, fg1, fg2, fg2)
+
+USE sales3c
+CREATE TABLE member (
+  pid  char(10),
+  fpid as substring(pid,1,1)PERSISTED,
+  name varchar(20)
+)
+ON psMember(fpid)
+
+USE sales3c
+ALTER PARTITION SCHEME psMember NEXT USED fg3
+
+
+USE sales3c
+ALTER PARTITION FUNCTION pfMember() SPLIT range ('W')
+
+
+ALTER PARTITION FUNCTION pfMember() MERGE range ('W')
+
+
+SELECT $PARTITION.pfMember('H')
+
+
+USE     sales3c
+SELECT $PARTITION.pfmember(fpid) as Partition, COUNT(*) AS row_count 
+FROM    member 
+GROUP   BY $PARTITION.pfmember(fpid)
+ORDER   BY Partition ;
+
+SELECT * FROM member
+WHERE $PARTITION.pfmember(fpid) = 2;
+
+USE sales3c
+CREATE TABLE member1 (
+  pid  char(10),
+  fpid as substring(pid,1,1)PERSISTED,
+  name varchar(20)
+)
+ON psMember(fpid)
+
+USE sales3c
+CREATE TABLE member2 (
+  pid  char(10),
+  fpid as substring(pid,1,1)PERSISTED,
+  name varchar(20)
+)
+ON psMember(fpid)
+
+ALTER TABLE member1 SWITCH PARTITION 1 TO member2 PARTITION 1
+
+

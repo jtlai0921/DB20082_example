@@ -1,0 +1,149 @@
+'***************** 2-4 **********************
+USE master
+GO
+CREATE DATABASE mis
+ON 
+( NAME = mis_data,
+  FILENAME = 'D:\sqldata\misdata.mdf',
+  SIZE = 20,
+  MAXSIZE = 50,
+  FILEGROWTH = 2 )
+LOG ON
+ ( NAME = 'mis_log',
+  FILENAME = 'c:\sqldata\mislog.ldf',
+  SIZE = 5MB,
+  MAXSIZE = 25MB,
+  FILEGROWTH = 2MB 
+) 
+GO
+
+'--------------------------------------------------------------------------
+USE master
+GO
+CREATE DATABASE mis 
+ON PRIMARY 
+( NAME = mis_data_1,
+  FILENAME = 'd:\sqldata\misdata1.mdf',
+  SIZE = 100MB,
+  MAXSIZE = 300,
+  FILEGROWTH = 5%),
+( NAME = mis_data_2,
+  FILENAME = 'd:\sqldata\misdata2.ndf',
+  SIZE = 100MB,
+  MAXSIZE = 300,
+  FILEGROWTH = 10),
+( NAME = mis_data_3,
+  FILENAME = 'd:\sqldata\misdata3.ndf',
+  SIZE = 100MB,
+  MAXSIZE = 300,
+  FILEGROWTH = 10
+)
+LOG ON 
+( NAME = mis_log_1,
+  FILENAME = 'd:\sqldata\mislog1.ldf',
+  SIZE = 50MB,
+  MAXSIZE = 100,
+  FILEGROWTH = 10),
+( NAME = mis_log_2,
+  FILENAME = 'd:\sqldata\mislog2.ldf',
+  SIZE = 50MB,
+  MAXSIZE = 100,
+  FILEGROWTH = 10
+)
+GO
+
+'-------------------------------------------------------------
+
+Use master
+CREATE DATABASE mis
+ON PRIMARY
+( NAME = mis_pr_data,
+  FILENAME = 'd:\sqldata\misprdata.mdf',
+  SIZE = 100,
+  MAXSIZE = 500,
+  FILEGROWTH = 5MB),
+FILEGROUP mis_grp
+( NAME = mis_grp_data_1,
+  FILENAME = 'd:\sqldata\misgrpdata1.ndf',
+  SIZE = 10,
+  MAXSIZE = 50,
+  FILEGROWTH = 5 ),
+( NAME = mis_grp_data_2,
+  FILENAME = 'd:\sqldata\misgrpdata2.ndf',
+  SIZE = 10,
+  MAXSIZE = 50,
+  FILEGROWTH = 5 )
+LOG ON
+( NAME = 'Sales_log',
+  FILENAME = 'd:\sqldata\salelog.ldf',
+  SIZE = 25MB,
+  MAXSIZE = 100MB,
+  FILEGROWTH = 5MB )
+GO
+
+
+'***************** 2-8-1 **********************
+
+ALTER DATABASE mis ADD FILE 
+( NAME = 'mis_data_3',
+ FILENAME = 'd:\sqldata\misdata3.ndf',
+ SIZE = 30MB,
+ MAXSIZE = 200MB,
+ FILEGROWTH = 5MB)
+GO
+
+ALTER DATABASE mis REMOVE FILE mis_data_3  
+
+'***************** 2-8-2 **********************
+
+ALTER DATABASE mis 
+MODIFY FILE  (NAME = 'mis_data_1', SIZE = 100MB)
+
+'***************** 2-8-3 **********************
+
+ALTER DATABASE mis ADD LOG FILE
+  ( name='mis_log1',
+    FILENAME='D:\sqldata\mislog1.ldf',
+    SIZE=2MB,
+    MAXSIZE=50MB,
+    FILEGROWTH=1MB
+  )
+
+ALTER DATABASE mis REMOVE FILE mis_log1         
+
+'***************** 2-8-4 **********************
+ALTER DATABASE mis ADD FILEGROUP mis_grp_2
+GO 
+ALTER DATABASE mis ADD FILE 
+( NAME = 'mis_data_1',
+  FILENAME = 'd:\sqldata\misdata1.ndf',
+  SIZE = 10MB,
+  MAXSIZE = 50MB,
+  FILEGROWTH = 2MB),
+( NAME = 'mis_data_2',
+  FILENAME = 'd:\sqldata\misdata2.ndf',
+  SIZE = 10MB,
+  MAXSIZE = 50MB,
+  FILEGROWTH = 2MB)
+TO FILEGROUP mis_grp_2
+ 
+ALTER DATABASE mis REMOVE FILEGROUP mis_grp_2    
+
+'***************** 2-8-5 **********************
+ALTER DATABASE mis MODIFY FILEGROUP mis_grp_2 DEFAULT    
+
+'***************** 2-12-1 **********************
+USE MASTER
+exec sp_detach_db MIS,true     
+
+USE MASTER
+EXEC sp_attach_db @dbname = 'MIS',
+    @filename1 = 'd:\sqldata\mis.mdf',
+    @filename2 = 'd:\sqldata\mis_log.ldf'
+
+
+EXEC sp_attach_single_file_db
+   @dbname = 'MIS',@physname = 'd:\sqldata\mis.mdf'
+
+CREATE DATABASE MIS ON 
+(filename='d:\sqldata\MIS1.mdf') FOR ATTACH

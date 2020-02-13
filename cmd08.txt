@@ -1,0 +1,90 @@
+'******************* 8-3 ************
+
+USE sales3c
+go
+CREATE VIEW 	v_emp AS 
+    SELECT   	emp_no, cname, addr
+    FROM  	employee
+
+CREATE VIEW 	v_sales (ivno, item_no, prod_cd, sales_date, amt) AS
+      SELECT    a.inv_no, a.item_no, a.mcode, b.sdate, a.qty * a.upri 
+      FROM    	sales_item a, sales_mast b
+      WHERE   	a.inv_no=b.inv_no 
+      AND       b.stor_id=¡¦1003¡¦
+
+'******************* 8-4 ************
+CREATE VIEW 	v_member_tpe AS
+      SELECT  	mem_id, name, zip, addr 
+      FROM    	member
+      WHERE 	zip >=  '100' 
+      AND      	zip <=  '117'
+
+
+INSERT INTO v_member_tpe VALUES (¡¥135436¡¦, '¤ý¤j©ú', '117', '¥x¥_¥«...')
+
+INSERT INTO v_member_tpe VALUES ('124678', '§õ«Ø¸s', '600', '¥x«n¥«...')
+
+
+CREATE VIEW	v_member_sales  AS
+    SELECT  	b.mem_id, b.name, a.inv_no, a.stor_id, a.sdate
+    FROM   	sales_mast a, member b
+    WHERE  	a.mem_id = b.mem_id
+
+
+INSERT INTO v_member_sales (mem_id, name) 
+VALUES ('675432', '³¯¤j¤s')
+INSERT INTO v_member_sales (inv_no, stor_id, sdate) 
+VALUES (¡¥FK89765434¡¦,¡¦1001¡¦,¡¥2006/03/04¡¦)
+
+
+INSERT INTO  v_member_sales (mem_id, name, inv_no, stor_id, sdate) 
+      VALUES('675432', '³¯¤j¤s', ¡¥FK89765434¡¦, ¡¦1001¡¦, ¡¥2006/03/04¡¦)
+
+'******************* 8-5 ************
+
+UPDATE  v_member_tpe  
+SET name='¤ý©k©k' WHERE  mem_id='135436'
+
+
+ UPDATE 	v_member_sales  SET sdate=¡¦2006/04/01¡¦ 
+ WHERE  	inv_no = ¡¥FK89765434¡¦
+
+
+UPDATE  	v_member_sales 
+ SET	     	sdate=¡¦2006/04/01¡¦,	name = '³¯¤j¤s'
+ WHERE  	inv_no = ¡¥FK89765434¡¦
+
+
+'******************* 8-8 ************
+
+INSERT INTO v_member_tpe VALUES ('124678', '§õ«Ø¸s', '600', '¥x«n¥«...')
+
+
+CREATE VIEW  	v_sales1 AS 
+SELECT  	inv_no, sdate 
+FROM  		sales_mast
+WHERE 		sdate = '2006/02/07'
+
+
+UPDATE  	v_sales1 
+SET     	sdate = '2006/02/08' 
+WHERE  	    	inv_no=¡¦FK84737654¡¦
+
+
+'******************* 8-12 ************
+
+CREATE VIEW v_sales_all  AS
+SELECT * FROM sales2004
+UNION ALL
+SELECT * FROM sales2005
+UNION ALL
+SELECT * FROM sales2006 
+
+'******************* 8-13 ************
+
+CREATE VIEW 	v_member_tpe  WITH SCHEMABINDING AS
+      SELECT  	mem_id, name, zip, addr 
+      FROM    	member
+      WHERE 	zip >=  '100' 
+      AND      	zip <=  '117'
+

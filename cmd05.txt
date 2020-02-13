@@ -1,0 +1,186 @@
+'***************  5-2 *************
+
+/* 人事資料表 */
+CREATE TABLE employee
+(
+   emp_no     	CHAR(5)  PRIMARY KEY,	/*員工編號*/
+   name	     	VARCHAR2(10),	        /*員工姓名*/
+   dept 	CHAR(4),	        /*所屬部門*/
+   date_hired	DATETIME,	        /*到職日  */
+   salary	INT 	                /*薪資   */ 
+)
+
+
+INSERT INTO employee 
+       VALUES('1001', '王大華', '業務部', '2006/10/20', 50000) 
+
+
+INSERT INTO 
+employee(emp_no, name, dept, data_hired, salary) 
+VALUES('1001', '王大華', '業務部', '2006/10/20', 50000) 
+
+
+INSERT INTO	new_employee 
+SELECT 		emp_no, name
+FROM  		employee 
+WHERE 		gender = 'F'
+
+
+CREATE  PROCEDURE sp_test AS
+SELECT  emp_no, name 
+FROM   	employee
+WHERE  	dept = '業務'
+GO
+
+
+INSERT INTO new_employee (emp_no, name)
+EXECUTE sp_test
+
+
+SELECT  emp_no, name, dept 
+FROM  	employee
+WHERE	dept = '管理'
+
+
+'***************  5-3 *************
+
+DELETE FROM sales_item 
+WHERE  inv_no in  
+(SELECT  inv_no 
+FROM  sales_mast WHERE   status = '9')
+
+
+UPDATE  employee 
+SET     title=’廠長’, salary=40000
+WHERE  	emp_no=’E0015’ 
+
+
+UPDATE  sales_item 
+SET     upri = upri * 0.9
+WHERE  	inv_no IN
+  	( SELECT   inv_no FROM  sales_mast
+WHERE   mem_id = '12345678')
+
+
+'***************  5-4 *************
+
+UPDATE   store_sales 
+SET      amt=amt + 
+(
+select    sum(B.upri * B.QTY) FROM  sales_item B
+WHERE     store_sales.mcode=B.mcode
+)
+
+
+
+UPDATE 	table1 SET column1 = 0 
+ WHERE  	column2 > x
+ GO
+ BACKUP LOG 資料庫名稱 WITH TRUNCATE_ONLY
+ GO
+ UPDATE 	table1 SET column1 = 0 
+ WHERE  	column2 <= x
+ GO
+
+
+BEGIN TRAN
+INSERT purchase (mcode, in_date, qty)
+          VALUES  ('S00001',getdate(),100) 
+
+IF @@ERROR != 0  
+BEGIN 
+      PRINT '異動進貨檔時產生錯誤 !!'
+      RETURN
+    END 
+
+
+'***************  5-7 *************
+
+UPDATE 	stock  
+SET     stk     = stk + 100 
+WHERE 	mcode 	= 'S00001' 
+
+IF @@ERROR != 0 OR @@ROWCOUNT = 0  
+    BEGIN 
+       ROLLBACK TRAN 
+        PRINT '異動庫存檔時產生錯誤 !!'
+       RETURN
+    END 
+COMMIT TRAN
+
+
+'***************** 5-8 **************
+
+BEGIN TRAN
+INSERT purchase (mcode, in_date, qty)
+             VALUES   ('S00001', getdate(),100)
+
+IF @@ERROR != 0  
+  BEGIN 
+    PRINT '異動進貨檔時產生錯誤 !!'
+    RETURN
+  END 
+
+SAVE TRANSACTION before_update_stk     
+
+UPDATE 	stock  
+SET     	stk   	= stk + 100 
+WHERE 	mcode 	= 'S00001'
+ 
+IF @@ERROR != 0 OR @@ROWCOUNT = 0 
+  BEGIN 
+    ROLLBACK TRAN before_update_stk
+    COMMIT TRAN
+    PRINT '異動庫存檔時產生錯誤 !!'
+    RETURN
+  END 
+COMMIT TRAN
+
+
+
+'***************** 5-9 **************
+
+BEGIN TRAN outer_tran
+UPDATE table_a ...
+IF 錯誤 RETURN
+BEGIN TRAN inner_tran
+UPDATE table_b
+IF 錯誤  
+    BEGIN
+         ROLLBACK TRAN outer_tran
+         RETURN
+    END 
+ELSE 
+    COMMIT TRAN inner_tran
+
+UPDATE table_c...
+IF 錯誤  
+	BEGIN 
+       ROLLBACK TRAN outer_tran
+       RETURN
+	END 
+COMMIT TRAN outer_outer 
+
+
+'***************** 5-11 **************
+
+BEGIN DISTRIBUTED TRANSACTION
+UPDATE employee SET name = '李大華' WHERE emp_id = 'E0001'
+EXECUTE xyzkas.sales3C.dbo.up_chgname 'E0001','李大華'
+COMMIT TRAN
+
+
+'***************** 5-16 **************
+
+BEGIN TRAN
+  UPDATE employee SET name = '李大華' WHERE emp_no='E0001'
+  WAITFOR DELAY '0:0:30'
+  GO
+  UPDATE employee SET name = '王大華' WHERE emp_no='E0001'
+  GO
+COMMIT TRAN
+
+
+UPDATE employee SET name = '陳大華' WHERE emp_no='E0001'  
+
+

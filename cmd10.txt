@@ -1,0 +1,24 @@
+'********* 10-5-2 *******************
+
+CREATE LOGIN [xyztap\Robert] FROM WINDOWS 
+WITH DEFAULT_DATABASE=[sales3c]
+
+'********* 10-6-2 *******************
+
+CREATE LOGIN lucy  WITH 
+    PASSWORD = 'lucychen'  MUST_CHANGE,
+    DEFAULT_DATABASE = [sales3c], CHECK_EXPIRATION = ON,
+    CHECK_POLICY = ON
+
+
+'********* 10-7-2 *******************
+use sales3c 
+create user jimmy from login eric
+
+
+'********* 10-11 *******************
+EXEC sp_dropsrvrolemember 'john', 'sysadmin'
+
+'********* 10-12-2 *******************
+EXEC sp_addrolemember 'manager', 'XYZTAP\eric'
+

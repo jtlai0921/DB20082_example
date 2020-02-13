@@ -1,0 +1,149 @@
+'********* 7-2 *************************
+DECLARE 		cur_mem CURSOR FOR
+ SELECT 		mem_id, name, county+town+addr as address
+ FROM   		member
+ WHERE  		zip=’112’  --台北市北投區
+ ORDER    		BY  mem_id
+
+DECLARE 	cur_emp SCROLL cursor FOR 
+SELECT  	emp_no, name 
+FROM    	employee
+WHERE 		dept = '業務'
+ORDER   	BY emp_no  
+
+	OPEN	cur_emp 
+	SELECT	"cursor開啟狀態"=@@ERROR 
+	SELECT	"cursor內資料筆數"=@@CURSOR_ROWS
+	FETCH	NEXT FROM cur_emp
+	SELECT	"cursor讀取狀態"=@@FETCH_STATUS
+
+
+	FETCH 	ABSOLUTE 5 FROM cur_emp 
+	SELECT 	"cursor讀取狀態"=@@FETCH_STATUS
+	FETCH 	RELATIVE -2 FROM cur_emp 
+	SELECT 	"cursor讀取狀態"=@@FETCH_STATUS
+	FETCH 	RELATIVE 8 FROM cur_emp 
+	SELECT	"cursor讀取狀態"=@@FETCH_STATUS
+	FETCH	PRIOR FROM cur_emp
+	SELECT	"cursor讀取狀態"=@@FETCH_STATUS
+
+FETCH   ABSOLUTE 3 FROM cur_emp
+SELECT  "cursor讀取狀態"=@@FETCH_STATUS
+
+'********* 7-7 *************************
+
+DECLARE cursor_a CURSOR FOR
+   SELECT * FROM employee  WHERE date_hired  >= '95/12/10'
+   FOR UPDATE OF salary
+
+DELETE FROM employee WHERE CURRENT OF cur_emp
+UPDATE employee SET salary = salary * 1.02  WHERE CURRENT OF cur_emp
+
+
+'********* 7-11 *************************
+
+DECLARE   @cur_var CURSOR
+DECLARE   cur_1 CURSOR FOR  SELECT ……..
+SET 	   @cur_var=cur_1
+
+
+DECLARE @cur_var CURSOR
+SET @cur_var=CURSOR SCROLL KEYSET FOR 
+SELECT inv_no, upri*qty FROM sales_item
+
+'********* 7-12 *************************
+
+USE sales3c
+SET NOCOUNT ON 
+DECLARE  @v_prt      	CHAR(80)
+DECLARE  @v_inv_no 		CHAR(10)
+DECLARE  @v_mcode  		CHAR(5)
+
+DECLARE  @v_qty      	INT
+DECLARE  @v_price    	INT
+
+DECLARE cur_sales CURSOR FOR 
+    SELECT inv_no FROM  sales_mast ORDER BY inv_no
+
+OPEN  cur_sales 
+FETCH NEXT FROM cur_sales INTO @v_inv_no  --第一張發票號碼
+
+WHILE (@@FETCH_STATUS <> -1)
+BEGIN 
+    DECLARE cur_item CURSOR FOR 
+        SELECT  mcode , qty, upri
+        FROM    sales_item 
+        WHERE  inv_no = @v_inv_no
+        ORDER  BY mcode
+
+    SELECT @v_prt='========= '+@v_inv_no+' ============'
+    IF @@FETCH_STATUS <> -1 
+    BEGIN 
+         PRINT ' '
+         PRINT @v_prt
+    END 
+
+    OPEN cur_item
+    FETCH NEXT  --取該筆發票的第一筆銷售品項
+         FROM cur_item INTO @v_mcode, @v_qty, @v_price
+
+    WHILE (@@FETCH_STATUS <> -1)
+    BEGIN
+        SELECT @v_prt=@v_mcode+
+                '  '+ CONVERT(CHAR(5),@v_qty)
+                        +'  '+CONVERT(CHAR(10),@v_price)     
+         PRINT  @v_prt
+         FETCH NEXT  --下一筆銷售品項
+                FROM cur_item INTO @v_mcode, @v_qty, @v_price
+    END
+    CLOSE cur_item
+    DEALLOCATE cur_item
+    FETCH NEXT FROM cur_sales INTO @v_inv_no  --下一張發票號碼
+END 
+CLOSE cur_sales
+DEALLOCATE cur_sales
+
+
+
+USE sales3c
+SET NOCOUNT ON 
+DECLARE  @v_prt      	CHAR(80)
+DECLARE  @v_inv_no 	     CHAR(10)
+DECLARE  @v_inv_no_1    CHAR(10)
+DECLARE  @v_mcode  		CHAR(5)
+DECLARE  @v_sup_id   	CHAR(5)
+DECLARE  @v_qty      	INT
+DECLARE  @v_price    	INT
+
+DECLARE 	cur_sales_detl CURSOR FOR 
+  SELECT 	sales_mast.inv_no, mcode, qty, upri
+  FROM  	sales_mast, sales_item
+  WHERE  	sales_mast.inv_no = sales_item.inv_no
+  ORDER 	BY sales_mast.inv_no
+
+SELECT  @v_inv_no_1=9999
+OPEN  cur_sales_detl 
+FETCH NEXT FROM cur_sales_detl
+      INTO @v_inv_no, @v_mcode, @v_qty, @v_price  
+
+WHILE (@@FETCH_STATUS <> -1)
+BEGIN 
+  IF @v_inv_no_1 <> @v_inv_no  --如果發票編號改變才印區隔線
+  BEGIN
+     SELECT @v_prt='========= '+
+             CONVERT(CHAR(5), @v_inv_no)+' ============'
+     PRINT ' '
+     PRINT @v_prt
+     SELECT @v_inv_no_1= @v_inv_no
+   END
+
+   SELECT @v_prt=@v_mcode+'  '+CONVERT(CHAR(5),@v_qty)
+        +'  '+CONVERT(CHAR(10),@v_price)     
+   PRINT  @v_prt
+   FETCH NEXT FROM cur_sales_detl
+      INTO @v_inv_no, @v_mcode, @v_qty, @v_price  
+END 
+CLOSE cur_sales_detl
+DEALLOCATE cur_sales_detl
+
+

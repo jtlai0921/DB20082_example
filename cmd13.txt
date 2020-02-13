@@ -1,0 +1,42 @@
+'************ 13-3-2 *****************
+
+IF  EXISTS (SELECT * FROM sys.tables 
+  WHERE object_id = OBJECT_ID(N'[dbo].[member_bak]')) 
+  drop table member_bak
+
+USE [sales3c]
+GO
+CREATE TABLE [dbo].[member_bak](
+	[mem_id] [char](8)  NOT NULL,
+	[name] [varchar](20)  NULL,
+	[birth] [datetime] NULL,
+	[county] [varchar](10)  NULL,
+	[town] [varchar](10)  NULL,
+	[addr] [varchar](50)  NULL,
+	[zip] [char](3)  NULL,
+	[occup] [char](2)  NULL,
+	[gender] [char](1)  NULL,
+	[tel_area] [varchar](3)  NULL,
+	[tel_no] [varchar](10)  NULL,
+	[mobil] [char](10)  NULL,
+	[email] [varchar](60)  NULL,
+	[mdate] [smalldatetime] NULL,
+    CONSTRAINT [PK_MEMBER1] PRIMARY KEY CLUSTERED 
+(
+	[mem_id] ASC
+)   WITH (IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+)   ON [PRIMARY]
+
+insert into member_bak select * from member      
+
+'************ 13-9 *****************
+
+  CREATE   PROCEDURE up_test AS 
+   SELECT	mem_id, name
+   FROM	member
+   WHERE   county=¡¦¥x¥_¿¤¡¦
+   GO
+
+
+
+

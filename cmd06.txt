@@ -1,0 +1,108 @@
+'******** 6-3-2 ******************
+
+  SELECT  @v_name=name, @v_salary=salary 
+  FROM    employee
+  WHERE   emp_no = 'E0002'  
+
+'******** 6-5 ******************
+
+SELECT	emp_no, emp_name, department=
+CASE	dept
+		  WHEN '業務'  THEN  'SA'
+		  WHEN '製造'  THEN  'MA'
+		  WHEN '會計'  THEN  'AC'
+		  WHEN '管理'  THEN  'AD'
+		  ELSE '部門代碼錯誤'
+END
+FROM employee
+
+
+UPDATE employee 
+SET salary = 
+ 	CASE 
+     WHEN salary >  40000 THEN salary * 1.03
+     WHEN salary >  30000 THEN salary * 1.04
+     WHEN salary >  20000 THEN salary * 1.05
+    ELSE  
+salary * 1.08
+	END
+
+
+BEGIN TRY
+ select 1/0
+ select 10/2
+END TRY
+
+BEGIN CATCH
+   select error_number(),error_line(),error_message()
+END CATCH
+
+
+create procedure up_try
+as  
+ select * from aaaa
+
+begin try
+ execute up_try
+end try
+
+begin catch
+ select error_number(),error_line(),error_message()
+end catch
+
+
+'******** 6-6 ******************
+
+SELECT  AVG(qty) 
+FROM    sales_item
+WHERE   mcode = ‘S00001’
+
+
+SELECT      prod_id, COUNT(*) 
+FROM 	    sale_item 
+GROUP       BY   mcode
+HAVING      COUNT(*) > 3
+
+
+SELECT	* FROM	employee
+WHERE	salary=(SELECT MAX(salary) FROM employee)
+
+SELECT   DATEPART(MONTH, sdate), COUNT(*)
+FROM 		sales_mast
+GROUP  	BY DATEPART(MONTH, sdate)
+ORDER  	BY DATEPART(MONTH, sdate)
+
+
+SELECT	   name, abs(DATEDIFF(YEAR, ‘2006/1/1’, date_hired) A
+ORDER	   BY A DESC
+
+
+SELECT 	emp_no, emp_name 
+FROM   	employee
+WHERE  	PATINDEX('%王_功%', emp_name) != 0
+
+
+   DECLARE @uid uniqueidentifier
+   SET @uid = NEWID()
+   PRINT '@uid is: '+ CONVERT(varchar(255), @uid)
+
+
+SELECT CONVERT(INT, 0x001000)  
+
+SELECT CONVERT(CHAR(6), GETDATE(), 12)        
+
+SELECT 	order_no, CONVERT(MONEY, tot_amt) 
+FROM   	sales 
+
+'******** 6-9 ******************
+
+SET SHOWPLAN ON
+GO
+SELECT     emp_no, emp_name, dept, title 
+FROM      employee 
+WHERE     emp_no= 'E0001'
+
+
+
+
+
